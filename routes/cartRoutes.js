@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const CartItem = require("../Model/ProductSchema");
 
-// POST /products/cartItems - Add item to cart
 router.post("/cartItems", async (req, res) => {
   const { name, img, review, price } = req.body;
   try {
@@ -15,7 +14,6 @@ router.post("/cartItems", async (req, res) => {
   }
 });
 
-// GET /products/cartItems - Get all cart items
 router.get("/cartItems", async (req, res) => {
   try {
     const cartItems = await CartItem.find();

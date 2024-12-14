@@ -12,7 +12,7 @@ app.use("/products", cartRoutes);
 const dbConnect = async () => {
   try {
     await mongoose.connect(
-      "mongodb+srv://tharuna07:Tharuna%407@cluster0.utjdpwt.mongodb.net/myCrudApp?retryWrites=true&w=majority"
+      "mongodb+srv://tharuna07:Tharuna@7@cluster0.utjdpwt.mongodb.net/"
     );
     console.log("database is connected");
   } catch (error) {
