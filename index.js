@@ -1,5 +1,6 @@
 require("dotenv").config();
 const path = require("path");
+const fs = require("fs");
 // Serve static files from the 'images' directory
 console.log("MONGO_URI:", process.env.MONGO_URI);
 const express = require("express");
@@ -18,11 +19,10 @@ app.use("/products", cartRoutes);
 const dbConnect = async () => {
   try {
     console.log("Attempting to connect to MongoDB...");
-    console.log("MONGO_URI:", process.env.MONGO_URI ? "Set" : "Not set");
-
-    if (!process.env.MONGO_URI) {
-      throw new Error("MONGO_URI environment variable is not set");
-    }
+    
+    // Use environment variable or fallback to hardcoded URI
+    const mongoUri = process.env.MONGO_URI || "mongodb+srv://tharuna07:Tharuna@7@cluster0.utjdpwt.mongodb.net/";
+    console.log("MONGO_URI:", mongoUri ? "Set" : "Not set");
 
     // Add connection options to handle timeouts better
     const options = {
@@ -30,7 +30,7 @@ const dbConnect = async () => {
       socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
     };
 
-    await mongoose.connect(process.env.MONGO_URI, options);
+    await mongoose.connect(mongoUri, options);
     console.log("✅ Database connected successfully");
   } catch (error) {
     console.error("❌ Database connection failed:", error.message);
@@ -74,6 +74,29 @@ app.get("/test-db", async (req, res) => {
     res.status(500).json({
       status: "Error",
       message: error.message,
+    });
+  }
+});
+
+// Add a test endpoint to list available images
+app.get("/test-images", (req, res) => {
+  try {
+    const imagesDir = path.join(__dirname, "images");
+    const files = fs.readdirSync(imagesDir);
+    const imageFiles = files.filter(file => 
+      file.endsWith('.png') || file.endsWith('.jpg') || file.endsWith('.jpeg')
+    );
+    
+    res.json({
+      message: "Available images",
+      count: imageFiles.length,
+      images: imageFiles,
+      baseUrl: `${req.protocol}://${req.get('host')}/images/`
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to read images directory",
+      message: error.message
     });
   }
 });
