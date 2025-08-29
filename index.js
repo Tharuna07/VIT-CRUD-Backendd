@@ -10,18 +10,33 @@ const userRoutes = require("./routes/userRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const cors = require("cors");
 
-app.use("/images", express.static(path.join(__dirname, "images")));
+// Configure CORS to allow all origins
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Serve static files with proper headers
+app.use("/images", express.static(path.join(__dirname, "images"), {
+  setHeaders: (res, path) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Cache-Control', 'public, max-age=31536000');
+  }
+}));
+
 app.use(express.json());
-app.use(cors());
 app.use("/users", userRoutes);
 app.use("/products", cartRoutes);
 
 const dbConnect = async () => {
   try {
     console.log("Attempting to connect to MongoDB...");
-    
+
     // Use environment variable or fallback to hardcoded URI
-    const mongoUri = process.env.MONGO_URI || "mongodb+srv://tharuna07:Tharuna@7@cluster0.utjdpwt.mongodb.net/";
+    const mongoUri =
+      process.env.MONGO_URI ||
+      "mongodb+srv://tharuna07:Tharuna@7@cluster0.utjdpwt.mongodb.net/";
     console.log("MONGO_URI:", mongoUri ? "Set" : "Not set");
 
     // Add connection options to handle timeouts better
@@ -83,20 +98,21 @@ app.get("/test-images", (req, res) => {
   try {
     const imagesDir = path.join(__dirname, "images");
     const files = fs.readdirSync(imagesDir);
-    const imageFiles = files.filter(file => 
-      file.endsWith('.png') || file.endsWith('.jpg') || file.endsWith('.jpeg')
+    const imageFiles = files.filter(
+      (file) =>
+        file.endsWith(".png") || file.endsWith(".jpg") || file.endsWith(".jpeg")
     );
-    
+
     res.json({
       message: "Available images",
       count: imageFiles.length,
       images: imageFiles,
-      baseUrl: `${req.protocol}://${req.get('host')}/images/`
+      baseUrl: `${req.protocol}://${req.get("host")}/images/`,
     });
   } catch (error) {
     res.status(500).json({
       error: "Failed to read images directory",
-      message: error.message
+      message: error.message,
     });
   }
 });
